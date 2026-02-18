@@ -125,7 +125,7 @@ void extractTarget(t_csv& csv, const std::string& target_name)
 
 t_csv parseCSV(std::string fil)
 {
-	static std::vector<std::string> drop_cols = {"PassengerId", "Name", "Ticket", "Cabin"};
+	static std::vector<std::string> drop_cols = {"Id", "PassengerId", "Name", "Ticket", "Cabin"};
 	std::ifstream file(fil.c_str());
 	if (!file.is_open())
 		throw std::runtime_error("Error: Could not open " + fil);

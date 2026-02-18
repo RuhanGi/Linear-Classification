@@ -1,6 +1,7 @@
 NAME = lclass.exe
 SRCDIR = src
-SRCS = main.cpp parse.cpp stats.cpp matrix.cpp predict.cpp overload.cpp basis.cpp
+SRCS =	main.cpp parse.cpp stats.cpp matrix.cpp predict.cpp \
+		overload.cpp basis.cpp grad.cpp
 OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
 
 OBJDIR = obj
@@ -52,5 +53,5 @@ re: fclean all
 
 gpush: fclean
 	git add .
-	git commit -m initial
+	git commit -m basis
 	git push

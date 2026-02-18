@@ -21,6 +21,13 @@ int	main(int argc, char *argv[])
 	{
 		t_csv csv = parseCSV(argv[1]);
 		printStats(csv);
+		doBasis(csv);
+		Row w = doGradientDescent(csv, LAMBDA);
+		Row preds = makePreds(csv.data, w);
+		std::cout << "\n" << rSqr(csv.output, preds) << "\n";
+		w = doGradientDescent(csv);
+		preds = makePreds(csv.data, w);
+		std::cout << "\n" << rSqr(csv.output, preds) << "\n";
 	}
 	catch (std::exception & e)
 	{

@@ -45,7 +45,7 @@
 #define LR 0.05
 #define TOLERANCE 0.01
 #define MAX_EPOCHS 10000
-#define LAMBDA 20
+#define LAMBDA 0.5
 
 #define OUTFILE "res.csv"
 
@@ -95,10 +95,7 @@ Matrix makePolyData(const Matrix& X, int m);
 
 Row	doGradientDescent(t_csv& csv, double lambda = 0.0);
 Row	doPolynomial(t_csv& csv, int m, Row (*func)(const Matrix&, const Row&, double), double lambda = 0.0);
-void exportPredictions(t_csv& csv, int degree);
-
-Row	doInteract(t_csv& csv, Row (*func)(const Matrix&, const Row&, double), double lambda = 0.0);
-Row predInteract(const Matrix& X, const Row& w);
-void testInteract(t_csv& csv);
 
 void calcResults(t_csv& csv);
+
+void doBasis(t_csv& csv);
