@@ -17,16 +17,17 @@ Matrix makePolyData(const Matrix& X, int m)
 {
 	size_t n = X.size();
 	size_t cols = X[0].size();
-	size_t new_cols = cols * m;
+	size_t new_cols = cols * m + 1;
 
 	Matrix phi(n, Row(new_cols));
 	for (size_t i = 0; i < n; i++)
-	{		
+	{
+        phi[i][0] = 1.0;
 		for (size_t j = 0; j < cols; j++)
 		{
-			phi[i][j * m] = X[i][j];
+			phi[i][j * m + 1] = X[i][j];
 			for (int d = 1; d < m; d++)
-				phi[i][j * m + d] = phi[i][j * m + d - 1] * X[i][j];
+				phi[i][j * m + d + 1] = phi[i][j * m + d] * X[i][j];
 		}
 	}
 	return phi;
@@ -174,13 +175,13 @@ Row	doSigmoid(t_csv& csv, int m, Row (*func)(const Matrix&, const Row&, double),
 }
 
 
-void doBasis(t_csv& csv)
+t_csv   doBasis(t_csv& csv)
 {
     if (csv.data.empty())
-		return ;
+		 throw std::invalid_argument("Empty Dataset");
 
     std::string choice;
-    std::cout << "Which basis (Polynomial - P, Gaussian - G, Sigmoid - S): ";
+    std::cout << CYAN "Which basis (Polynomial - P, Gaussian - G, Sigmoid - S): " RESET;
     std::cin >> choice;
 
     Matrix X;
@@ -192,22 +193,11 @@ void doBasis(t_csv& csv)
         X = makeSigmoid(csv.data, DEGREE);
     else
         throw std::invalid_argument("Start with S, P, or G only!");
+	
+    csv.data = X;
 
-    t_csv poly_csv;
-	poly_csv.data = X;
-	poly_csv.output = csv.output;
-	normalize(poly_csv);
-	Row w = closedForm(poly_csv.data, poly_csv.output, LAMBDA);
-	// Row w = gradDescent(poly_csv.data, poly_csv.output, LAMBDA);
-
-    Row preds = makePreds(poly_csv.data, w);
-    std::cout << "Rsqr = " << rSqr(poly_csv.output, preds) << "\n";
-	// if (choice[0] == 'P')
-    //     Matrix X = makePolyData(csv.data, DEGREE);
-    // else if (choice[0] == 'G')
-    //     Matrix X = makeGaussian(csv.data, DEGREE);
-    // else if (choice[0] == 'S')
-    //     Matrix X = makeSigmoid(csv.data, DEGREE);
-    // else
-    //     throw std::invalid_argument("Start with S, P, or G only!");
+    t_csv test = splitTest(csv);
+	normalize(csv);
+	normalize(test);
+    return test;
 }

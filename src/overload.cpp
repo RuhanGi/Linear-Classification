@@ -59,6 +59,21 @@ std::ostream& operator<<(std::ostream& os, const Row& row)
 }
 
 
+Matrix operator+(const Matrix& A, const Matrix& B)
+{
+    if (A.empty() || B.empty())
+        return {};
+    if (A.size() != B.size() || A[0].size() != B[0].size())
+        throw std::invalid_argument("Matrix Mismath in Addition");
+
+    Matrix res = A;
+    for (size_t i = 0; i < A.size(); i++)
+        for (size_t j = 0; j < A[0].size(); j++)
+            res[i][j] += B[i][j];
+    return res;
+}
+
+
 Matrix operator*(const double k, const Matrix& m)
 {
     if (m.empty())
@@ -174,6 +189,20 @@ Row operator*(const Row& A, const Row& B)
     Row res(n);
     for (size_t i = 0; i < n; i++)
         res[i] = A[i] * B[i];
+    return res;
+}
+
+
+
+Row operator*(const Row& A, const Matrix& M)
+{
+    if (A.empty() || M.empty() || A.size() != M.size())
+        throw std::invalid_argument("Dimension Mismatch: Matrix Rows != Vector Size");
+    
+    Row res(M[0].size(), 0.0);
+    for (size_t i = 0; i < M.size(); i++)
+        for (size_t j = 0; j < M[0].size(); j++)
+            res[j] += A[i] * M[i][j];
     return res;
 }
 

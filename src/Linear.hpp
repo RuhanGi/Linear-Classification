@@ -23,6 +23,7 @@
 #include <sstream>
 #include <iomanip>
 #include <chrono>
+#include <cstdio>
 #include <random>
 #include <string>
 #include <vector>
@@ -41,10 +42,13 @@
 
 #define DEGREE 3
 
-#define SPLIT 0.2
+#define SPLIT 0.8
 #define LR 0.05
-#define TOLERANCE 0.01
+#define TOLERANCE 1e-5
 #define MAX_EPOCHS 10000
+
+#define ALPHA 1.0
+#define BETA 1.0
 #define LAMBDA 0.5
 
 #define OUTFILE "res.csv"
@@ -68,24 +72,28 @@ void normalize(t_csv& csv);
 void denormalizeData(t_csv& csv);
 void denormalizeWeights(const t_csv& csv, Row& w);
 double rSqr(const Row& actual, const Row& pred);
+t_csv splitTest(t_csv& train);
 
 std::string smartFormat(double val);
 std::ostream& operator<<(std::ostream& os, const Matrix& m);
 std::ostream& operator<<(std::ostream& os, const Row& row);
 Matrix operator*(const double k, const Matrix& m);
 Matrix operator*(const Matrix& A, const Matrix& B);
+Matrix operator+(const Matrix& A, const Matrix& B);
 Row operator+(const Row& A, const Row& B);
 Row& operator+=(Row& A, const Row& B);
 Row operator-(const Row& A, const Row& B);
 Row& operator-=(Row& A, const Row& B);
 Row operator*(const double k, const Row& r);
 Row operator*(const Row& A, const Row& B);
+Row operator*(const Row& A, const Matrix& M);
 Row& operator*=(Row& A, const Row& B);
 Row operator*(const Matrix& X, const Row& r);
 
 Matrix randomizeMatrix(size_t rows, size_t cols);
 Matrix transpose(const Matrix& m);
 Matrix invert(const Matrix& m);
+double dot(const Row& A, const Row& B);
 double det(Matrix m);
 
 Row makePreds(const Matrix& X, const Row& w, int m = 1);
@@ -96,6 +104,9 @@ Matrix makePolyData(const Matrix& X, int m);
 Row	doGradientDescent(t_csv& csv, double lambda = 0.0);
 Row	doPolynomial(t_csv& csv, int m, Row (*func)(const Matrix&, const Row&, double), double lambda = 0.0);
 
-void calcResults(t_csv& csv);
+t_csv	doBasis(t_csv& csv);
 
-void doBasis(t_csv& csv);
+void calcBayesian(t_csv& csv, t_csv& test, double alpha = ALPHA, double beta = BETA);
+
+void doLogReg(t_csv& csv, t_csv& test);
+void doGDA(t_csv& csv);

@@ -1,7 +1,7 @@
 NAME = lclass.exe
 SRCDIR = src
 SRCS =	main.cpp parse.cpp stats.cpp matrix.cpp predict.cpp \
-		overload.cpp basis.cpp grad.cpp
+		overload.cpp basis.cpp grad.cpp bayesian.cpp classifier.cpp
 OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
 
 OBJDIR = obj
@@ -19,7 +19,6 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 
 $(NAME): $(OBJS)
 	c++ $(CXXFLAGS) $(OBJS) -o $(NAME)
-
 
 i: $(OBJDIR) $(NAME)
 	-.\$(NAME) datasets/Iris/Iris.csv
@@ -42,6 +41,14 @@ f: $(OBJDIR) $(NAME)
 g: $(OBJDIR) $(NAME)
 	-.\$(NAME) "datasets/genPoly-5.csv"
 
+plot:
+	python helper/plot.py res.csv
+
+w:
+	python helper/plotWeights.py Weights.csv
+
+cf:
+	python helper/plotClassif.py predictions.csv weights.csv
 
 clean:
 	if exist $(OBJDIR) rmdir /s /q $(OBJDIR)
@@ -53,5 +60,5 @@ re: fclean all
 
 gpush: fclean
 	git add .
-	git commit -m basis
+	git commit -m "cf done"
 	git push

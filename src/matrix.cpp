@@ -150,3 +150,16 @@ Matrix invert(const Matrix& m)
             res[i][j] = aug[i][n + j];
     return res;
 }
+
+
+double dot(const Row& A, const Row& B)
+{
+    if (A.size() != B.size())
+        throw std::invalid_argument("Dimension Mismatch: Vectors must be same size for Dot Product");
+
+    double sum = 0.0;
+    for (size_t i = 0; i < A.size(); ++i) {
+        sum += A[i] * B[i];
+    }
+    return sum;
+}

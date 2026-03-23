@@ -96,17 +96,18 @@ void printStats(const t_csv& csv)
 
 void normalize(t_csv& csv)
 {
-    csv.means = findMeans(csv);
-    Row vars = findVars(csv, csv.means);
-    csv.stds = findStds(vars);
-
     size_t rows = csv.data.size();
     size_t cols = csv.data[0].size();
 
     for (size_t i = 0; i < rows; i++)
     {
         for (size_t j = 0; j < cols; j++)
-            csv.data[i][j] = (csv.data[i][j] - csv.means[j]) / ((std::abs(csv.stds[j]) > 1e-9) ? csv.stds[j] : 1);
+        {
+            if ((std::abs(csv.stds[j]) > 1e-9))
+                csv.data[i][j] = (csv.data[i][j] - csv.means[j]) / csv.stds[j];
+            else if (csv.means[j] != 1)
+                csv.data[i][j] = (csv.data[i][j] - csv.means[j]);
+        }
         csv.output[i] = (csv.output[i] - csv.means[cols]) / ((std::abs(csv.stds[cols]) > 1e-9) ? csv.stds[cols] : 1);
     }
 }
@@ -167,3 +168,40 @@ double rSqr(const Row& actual, const Row& pred)
 	return 1 - (sumRes / sumSqr);
 }
 
+
+t_csv splitTest(t_csv& train)
+{
+    t_csv test;
+    // test.headers = train.headers;
+    // test.label = train.label;
+
+    std::vector<size_t> indices(train.data.size());
+    std::iota(indices.begin(), indices.end(), 0);
+    
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(indices.begin(), indices.end(), g);
+
+    Matrix shuffled_data;
+    Row shuffled_output;
+    for (size_t i : indices) {
+        shuffled_data.push_back(train.data[i]);
+        shuffled_output.push_back(train.output[i]);
+    }
+    train.data = std::move(shuffled_data);
+    train.output = std::move(shuffled_output);
+
+    size_t total_rows = train.data.size();
+    size_t split_idx = static_cast<size_t>(total_rows * SPLIT);
+    test.data.assign(train.data.begin() + split_idx, train.data.end());
+    test.output.assign(train.output.begin() + split_idx, train.output.end());
+    train.data.erase(train.data.begin() + split_idx, train.data.end());
+    train.output.erase(train.output.begin() + split_idx, train.output.end());
+
+    train.means = findMeans(train);
+    Row vars = findVars(train, train.means);
+    train.stds = findStds(vars);
+    test.means = train.means;
+    test.stds = train.stds;
+    return test;
+}
