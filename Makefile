@@ -41,6 +41,9 @@ f: $(OBJDIR) $(NAME)
 g: $(OBJDIR) $(NAME)
 	-.\$(NAME) "datasets/genPoly-5.csv"
 
+s: $(OBJDIR) $(NAME)
+	-.\$(NAME) "datasets/synthCF.csv"
+
 plot:
 	python helper/plot.py res.csv
 
@@ -49,6 +52,9 @@ w:
 
 cf:
 	python helper/plotClassif.py predictions.csv weights.csv
+
+costs:
+	python helper/costs.py cost_history.csv
 
 clean:
 	if exist $(OBJDIR) rmdir /s /q $(OBJDIR)
@@ -60,5 +66,5 @@ re: fclean all
 
 gpush: fclean
 	git add .
-	git commit -m "cf done"
+	git commit -m "costs"
 	git push

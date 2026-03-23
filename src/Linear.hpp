@@ -106,6 +106,7 @@ Row	doPolynomial(t_csv& csv, int m, Row (*func)(const Matrix&, const Row&, doubl
 
 t_csv	doBasis(t_csv& csv);
 
+void appendCSV(const std::string& filename, const std::string& new_header, Row& new_col);
 void calcBayesian(t_csv& csv, t_csv& test, double alpha = ALPHA, double beta = BETA);
 
 void doLogReg(t_csv& csv, t_csv& test);

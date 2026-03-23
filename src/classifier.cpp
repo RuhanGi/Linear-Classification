@@ -41,11 +41,13 @@ Row logisticRegression(const Matrix& X, const Row& y)
     size_t n = X[0].size();
     
     Row w(n, 0.0);
+    Row cost_history;
     double prev_cost = 1e9;
     for (int epoch = 0; epoch < MAX_EPOCHS; epoch++)
     {
         Row h = sigmoid(X * w);
         double cost = crossEntropyCost(h, y);
+        cost_history.push_back(cost);
 
         if (epoch % 1000 == 0)
             std::cout << "Epoch " << epoch << " | Cost: " << cost << "\r" << std::flush;
@@ -65,6 +67,7 @@ Row logisticRegression(const Matrix& X, const Row& y)
         for (size_t j = 0; j < n; ++j)
             w[j] -= (LR / m) * gradient[j];
     }
+    appendCSV("cost_history.csv", "sigm cost", cost_history);
     return w;
 }
 
@@ -78,37 +81,30 @@ Row gda(const Matrix& X, const Row& y)
     Row mu0(n_features, 0.0);
     Row mu1(n_features, 0.0);
 
-    // 1. Calculate the Means for each class
-    for (size_t i = 0; i < m; ++i) {
-        if (y[i] == 1.0) {
-            m1++;
-            for (size_t j = 1; j < n_cols; ++j)
+    for (size_t i = 0; i < m; i++) 
+    {
+        if (y[i] == 1.0 && ++m1)
+            for (size_t j = 1; j < n_cols; j++)
                 mu1[j - 1] += X[i][j];
-        } else {
-            m0++;
-            for (size_t j = 1; j < n_cols; ++j)
+        else if (++m0)
+            for (size_t j = 1; j < n_cols; j++)
                 mu0[j - 1] += X[i][j];
-        }
     }
-    for (size_t j = 0; j < n_features; ++j) {
+    for (size_t j = 0; j < n_features; j++)
+    {
         mu0[j] /= m0;
         mu1[j] /= m1;
     }
 
-    // 2. The Prior (phi)
     double phi = m1 / m;
-
-    // 3. Calculate Shared Covariance Matrix (Sigma)
     Matrix Sigma(n_features, Row(n_features, 0.0));
     for (size_t i = 0; i < m; ++i) {
-        Row x_minus_mu(n_features);
+        Row res(n_features);
         for (size_t j = 1; j < n_cols; ++j)
-            x_minus_mu[j - 1] = X[i][j] - (y[i] == 1.0 ? mu1[j - 1] : mu0[j - 1]);
-        
-        // Add outer product to Sigma
+            res[j - 1] = X[i][j] - (y[i] == 1.0 ? mu1[j - 1] : mu0[j - 1]);
         for (size_t r = 0; r < n_features; ++r)
             for (size_t c = 0; c < n_features; ++c)
-                Sigma[r][c] += x_minus_mu[r] * x_minus_mu[c];
+                Sigma[r][c] += res[r] * res[c];
     }
     for (size_t r = 0; r < n_features; ++r)
         for (size_t c = 0; c < n_features; ++c)
@@ -116,14 +112,13 @@ Row gda(const Matrix& X, const Row& y)
 
     Matrix SigmaInv = invert(Sigma);
 
-    // 5. Convert GDA parameters into equivalent Logistic Regression weights
-    // w_features = SigmaInv * (mu1 - mu0)
-    Row w_features(n_features, 0.0);
+    // w = SigmaInv * (mu1 - mu0)
+    Row w(n_features+1, 0.0);
     for (size_t r = 0; r < n_features; ++r)
         for (size_t c = 0; c < n_features; ++c)
-            w_features[r] += SigmaInv[r][c] * (mu1[c] - mu0[c]);
+            w[r+1] += SigmaInv[r][c] * (mu1[c] - mu0[c]);
 
-    // w0 (Bias) = -0.5 * mu1^T * SigmaInv * mu1 + 0.5 * mu0^T * SigmaInv * mu0 + ln(phi / (1-phi))
+    // w0 = -0.5 * mu1^T * SigmaInv * mu1 + 0.5 * mu0^T * SigmaInv * mu0 + ln(phi / (1-phi))
     double term1 = 0, term2 = 0;
     for (size_t r = 0; r < n_features; ++r) {
         double temp1 = 0, temp2 = 0;
@@ -134,14 +129,7 @@ Row gda(const Matrix& X, const Row& y)
         term1 += mu1[r] * temp1;
         term2 += mu0[r] * temp2;
     }
-    double w0 = -0.5 * term1 + 0.5 * term2 + std::log(phi / (1.0 - phi));
-
-    // 6. Pack it all into the final weight vector
-    Row w(n_cols);
-    w[0] = w0;
-    for (size_t j = 1; j < n_cols; ++j)
-        w[j] = w_features[j - 1];
-
+    w[0] = -0.5 * term1 + 0.5 * term2 + std::log(phi / (1.0 - phi));
     return w;
 }
 

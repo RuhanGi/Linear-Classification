@@ -43,11 +43,11 @@ int	main(int argc, char *argv[])
 		filterBinaryClasses(csv);
 		printStats(csv);
 
-		// t_csv test = doBasis(csv);
+		t_csv test = doBasis(csv);
 		// calcBayesian(csv, test);
-		// doLogReg(csv, test);
+		doLogReg(csv, test);
 
-		doGDA(csv);
+		// doGDA(csv);
 	}
 	catch (std::exception & e)
 	{
