@@ -66,5 +66,5 @@ re: fclean all
 
 gpush: fclean
 	git add .
-	git commit -m "costs"
+	git commit -m "clean"
 	git push
