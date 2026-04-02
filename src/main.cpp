@@ -40,12 +40,13 @@ int	main(int argc, char *argv[])
 	try
 	{
 		t_csv csv = parseCSV(argv[1]);
-		filterBinaryClasses(csv);
+		// filterBinaryClasses(csv);
 		printStats(csv);
 
 		t_csv test = doBasis(csv);
 		// calcBayesian(csv, test);
-		doLogReg(csv, test);
+		// doLogReg(csv, test);
+		doMulticlassLogReg(csv, test);
 
 		// doGDA(csv);
 	}

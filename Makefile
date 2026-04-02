@@ -66,5 +66,5 @@ re: fclean all
 
 gpush: fclean
 	git add .
-	git commit -m "clean"
+	git commit -m "multiclass"
 	git push

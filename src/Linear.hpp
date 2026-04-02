@@ -30,6 +30,7 @@
 #include <cmath>
 #include <ctime>
 #include <map>
+#include <set>
 
 #define GREY	"\x1B[30m"
 #define RED		"\x1B[31m"
@@ -111,3 +112,5 @@ void calcBayesian(t_csv& csv, t_csv& test, double alpha = ALPHA, double beta = B
 
 void doLogReg(t_csv& csv, t_csv& test);
 void doGDA(t_csv& csv);
+
+void doMulticlassLogReg(t_csv& csv, t_csv& test);

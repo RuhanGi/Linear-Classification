@@ -240,3 +240,52 @@ void doGDA(t_csv& csv)
 
     exportResults(test.data, test.output, pred_labels, w);
 }
+
+
+void doMulticlassLogReg(t_csv& csv, t_csv& test)
+{
+    double mean = csv.means[csv.means.size()-1];
+    double std = csv.stds[csv.stds.size()-1];
+    Row& train_labels = denormalize(csv.output, mean, std);
+    Row& test_labels = denormalize(test.output, mean, std);
+
+    std::set<double> unique(train_labels.begin(), train_labels.end());
+    size_t num_classes = unique.size();
+
+    Matrix all_weights;
+    std::vector<double> class_list(unique.begin(), unique.end());
+
+    for (double target_class : class_list)
+    {
+        Row binary_labels(train_labels.size());
+        for (size_t i = 0; i < train_labels.size(); i++)
+            binary_labels[i] = (std::abs(train_labels[i] - target_class) < 1e-7) ? 1.0 : 0.0;
+        all_weights.push_back(logisticRegression(csv.data, binary_labels));
+    }
+
+    size_t n_test = test_labels.size();
+    int correct_count = 0;
+    for (size_t i = 0; i < n_test; i++)
+    {
+        double max_prob = -1;
+        double best_class = class_list[0];
+        for (size_t k = 0; k < num_classes; k++) 
+        {
+            double z = 0.0;
+            for (size_t j = 0; j < test.data[i].size(); j++)
+                z += test.data[i][j] * all_weights[k][j];
+            double prob = 1.0 / (1.0 + std::exp(-z));
+            if (prob > max_prob) 
+            {
+                max_prob = prob;
+                best_class = class_list[k];
+            }
+        }
+        if (std::abs(best_class - test_labels[i]) < 1e-7)
+            correct_count++;
+    }
+
+    double accuracy = (double) correct_count / n_test * 100.0;
+    std::cout << "Correct Predictions: " << correct_count << "/" << n_test << "\n";
+    std::cout << "Final Multiclass Accuracy: " << accuracy << "%\n";
+}
